@@ -12,6 +12,8 @@ import { graphqlHTTP } from "express-graphql";
 
 import schema from "./graphql/schema.js";
 import resolvers from "./graphql/resolvers.js";
+import isAuth from "./middleware/isAuth.js";
+import { deleteImage } from "./utils/image.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -54,6 +56,25 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
+});
+
+app.use(isAuth);
+
+app.put("/post-image", (req, res, next) => {
+  if (!req.isAuth) {
+    const error = new Error("Not authenticated!");
+    error.code = 401;
+    throw error;
+  }
+  if (!req.file) {
+    return res.status(200).json({ message: "No file provided!" });
+  }
+  if (req.body.oldPath) {
+    deleteImage(req.body.oldPath);
+  }
+  return res
+    .status(201)
+    .json({ message: "File stored!", filePath: req.file.path });
 });
 
 app.use(

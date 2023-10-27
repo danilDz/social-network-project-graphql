@@ -25,18 +25,34 @@ export default buildSchema(`
     userId: String!
   }
 
+  type PostData {
+    posts: [Post!]!
+    totalPosts: Int!
+  }
+
   input UserInputData {
     email: String!
     name: String!
     password: String!
   }
 
+  input PostInputData {
+    title: String!
+    content: String!
+    imageUrl: String!
+  }
+
   type RootQuery {
     login(email: String!, password: String!): AuthData!
+    getPosts(page: Int!): PostData!
+    getPost(postId: ID!): Post!
   }
 
   type RootMutation {
     createUser(userInput: UserInputData!): User!
+    createPost(postInput: PostInputData!): Post!
+    updatePost(postInput: PostInputData!, id: ID!): Post!
+    deletePost(id: ID!): Boolean
   }
 
   schema {
