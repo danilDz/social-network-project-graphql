@@ -214,7 +214,7 @@ export default {
       updatedAt: updatedPost.updatedAt.toISOString(),
     };
   },
-  deletePost: async function ({id}, req) {
+  deletePost: async function ({ id }, req) {
     if (!req.isAuth) {
       const error = new Error("Not authenticated!");
       error.code = 401;
@@ -237,5 +237,35 @@ export default {
     user.posts.pull(id);
     await user.save();
     return true;
-  }
+  },
+  getUser: async function (args, req) {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated!");
+      error.code = 401;
+      throw error;
+    }
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error("No user found!");
+      error.code = 404;
+      throw error;
+    }
+    return { ...user._doc, _id: user._id.toString() };
+  },
+  updateStatus: async function ({ newStatus }, req) {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated!");
+      error.code = 401;
+      throw error;
+    }
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error("No user found!");
+      error.code = 404;
+      throw error;
+    }
+    user.status = newStatus;
+    await user.save();
+    return { ...user._doc, _id: user._id.toString() };
+  },
 };
